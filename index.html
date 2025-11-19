@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusPro - 专业专注助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a1a, #002b5c);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 40px);
+            background: rgba(10, 10, 26, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 43, 92, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .left-panel {
+            width: 35%;
+            padding: 20px;
+            border-right: 1px solid rgba(0, 120, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 35%;
+            padding: 20px;
+            border-right: 1px solid rgba(0, 120, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+        
+        .sidebar {
+            width: 30%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+        
+        .panel-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0078ff;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #0078ff;
+            padding-bottom: 8px;
+        }
+        
+        .timer-container {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 43, 92, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 120, 255, 0.3);
+        }
+        
+        .timer-label {
+            font-size: 16px;
+            color: #0078ff;
+            margin-bottom: 12px;
+        }
+        
+        .timer {
+            font-size: 56px;
+            font-weight: 700;
+            color: #0078ff;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #0078ff;
+            transition: width 0.3s ease;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-start {
+            background: #0078ff;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-pause, .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
+        }
+        
+        .btn-skip {
+            background: #ff4488;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 120, 255, 0.3);
+        }
+        
+        .btn-start:hover {
+            background: #0066cc;
+        }
+        
+        .btn-skip:hover {
+            background: #ff2266;
+        }
+        
+        .mode-section {
+            background: rgba(0, 43, 92, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(0, 120, 255, 0.3);
+        }
+        
+        .mode-option {
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .mode-option:hover {
+            background: rgba(0, 120, 255, 0.2);
+        }
+        
+        .mode-option.active {
+            border-color: #0078ff;
+            background: rgba(0, 120, 255, 0.1);
+        }
+        
+        .sound-section {
+            background: rgba(0, 43, 92, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(0, 120, 255, 0.3);
+        }
+        
+        .sound-controls {
+            margin-top: 12px;
+        }
+        
+        select, input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            margin: 8px 0;
+        }
+        
+        .env-control {
+            background: rgba(255, 68, 136, 0.1);
+            border: 2px solid #ff4488;
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .env-control ul {
+            list-style: none;
+            margin-top: 12px;
+        }
+        
+        .env-control li {
+            padding: 6px 0;
+            color: #ffffff;
+            font-size: 13px;
+        }
+        
+        .env-control li::before {
+            content: "• ";
+            color: #0078ff;
+            font-weight: bold;
+        }
+        
+        .settings-section, .stats-section, .task-section {
+            background: rgba(0, 43, 92, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(0, 120, 255, 0.3);
+        }
+        
+        .input-group {
+            margin: 12px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #0078ff;
+            font-size: 14px;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0078ff;
+            margin: 4px 0;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #ffffff;
+        }
+        
+        .task-input {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .task-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .chat-container {
+            background: rgba(0, 43, 92, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(0, 120, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .chat-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            max-height: 200px;
+        }
+        
+        .message {
+            padding: 8px;
+            margin: 4px 0;
+            background: rgba(0, 120, 255, 0.1);
+            border-radius: 6px;
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+        
+        .user-list {
+            margin: 12px 0;
+        }
+        
+        .user-list h4 {
+            color: #0078ff;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+        }
+        
+        .user-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .status {
+            text-align: center;
+            font-size: 11px;
+            color: #00ffff;
+            margin-top: 8px;
+        }
+        
+        .task-list h4 {
+            color: #0078ff;
+            margin: 12px 0 8px 0;
+            font-size: 14px;
+        }
+        
+        .task-item {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div class="timer-container">
+                <div class="timer-label">准备专注</div>
+                <div class="timer">90:00</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-start">开始专注</button>
+                    <button class="btn btn-pause">暂停</button>
+                    <button class="btn btn-reset">重置</button>
+                    <button class="btn btn-skip">跳过</button>
+                </div>
+            </div>
+            
+            <div class="mode-section">
+                <h3 class="panel-title">专业场景模式</h3>
+                <div class="mode-option">
+                    <strong>深度编程</strong><br>
+                    <small>25分钟专注，5分钟休息</small>
+                </div>
+                <div class="mode-option">
+                    <strong>数据分析</strong><br>
+                    <small>45分钟专注，15分钟休息</small>
+                </div>
+                <div class="mode-option">
+                    <strong>创意设计</strong><br>
+                    <small>60分钟专注，20分钟休息</small>
+                </div>
+                <div class="mode-option active">
+                    <strong>深度工作</strong><br>
+                    <small>90分钟专注，30分钟休息</small>
+                </div>
+            </div>
+            
+            <div class="sound-section">
+                <h3 class="panel-title">背景音效</h3>
+                <div class="sound-controls">
+                    <select>
+                        <option>白噪音</option>
+                        <option>自然声音</option>
+                        <option>轻音乐</option>
+                        <option>雨声</option>
+                    </select>
+                    <label>音量: 100%</label>
+                    <input type="range" min="0" max="100" value="100">
+                </div>
+            </div>
+            
+            <div class="env-control">
+                <h3 class="panel-title">专注环境控制</h3>
+                <ul>
+                    <li>智能通知过滤已启用</li>
+                    <li>阻断干扰网站访问</li>
+                    <li>屏幕环境已优化</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="settings-section">
+                <h3 class="panel-title">专注设置</h3>
+                <div class="input-group">
+                    <label>专注时长 (分钟)</label>
+                    <input type="number" value="90">
+                </div>
+                <div class="input-group">
+                    <label>休息时长 (分钟)</label>
+                    <input type="number" value="30">
+                </div>
+                <div class="input-group">
+                    <label>自动跳过休息</label>
+                    <select>
+                        <option>关闭</option>
+                        <option>开启</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>智能调整</label>
+                    <select>
+                        <option>固定时长</option>
+                        <option>智能调整</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="stats-section">
+                <h3 class="panel-title">今日统计</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">专注次数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">0分钟</div>
+                        <div class="stat-label">总专注时长</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">0分钟/次</div>
+                        <div class="stat-label">平均专注度</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">中断次数</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="task-section">
+                <h3 class="panel-title">任务管理</h3>
+                <div class="task-input">
+                    <input type="text" placeholder="输入当前专注的任务...">
+                    <button class="btn btn-start">添加任务</button>
+                </div>
+                <div class="task-list">
+                    <h4>任务列表</h4>
+                    <!-- Task items will be added here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h3 class="panel-title">实时聊天室</h3>
+                </div>
+                
+                <div class="chat-messages">
+                    <div class="message">欢迎加入聊天室！请文明交流。</div>
+                    <div class="message">晨猫 加入了聊天室</div>
+                </div>
+                
+                <div class="user-list">
+                    <h4>在线用户</h4>
+                    <div class="user-item">
+                        <div class="user-dot"></div>
+                        <span>晨猫</span>
+                    </div>
+                    <div class="user-item">
+                        <div class="user-dot"></div>
+                        <span>系统</span>
+                    </div>
+                    <div class="user-item">
+                        <div class="user-dot"></div>
+                        <span>Alice</span>
+                    </div>
+                    <div class="user-item">
+                        <div class="user-dot"></div>
+                        <span>Bob</span>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" placeholder="输入消息...">
+                    <button class="btn btn-start" id="send-btn">发送</button>
+                </div>
+                
+                <div class="status">已连接</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Timer functionality
+        let timeLeft = 90 * 60; // 90 minutes in seconds
+        let timerInterval = null;
+        let isRunning = false;
+        
+        const timerDisplay = document.querySelector('.timer');
+        const progressBar = document.querySelector('.progress-fill');
+        const startBtn = document.querySelector('.btn-start');
+        const pauseBtn = document.querySelector('.btn-pause');
+        const resetBtn = document.querySelector('.btn-reset');
+        const skipBtn = document.querySelector('.btn-skip');
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const totalTime = 90 * 60;
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        function startTimer() {
+            if (isRunning) return;
+            isRunning = true;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    alert('专注时间结束！');
+                    timeLeft = 90 * 60;
+                    updateTimer();
+                }
+            }, 1000);
+        }
+        
+        function pauseTimer() {
+            if (!isRunning) return;
+            clearInterval(timerInterval);
+            isRunning = false;
+        }
+        
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeLeft = 90 * 60;
+            updateTimer();
+        }
+        
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        skipBtn.addEventListener('click', () => {
+            timeLeft = 0;
+            updateTimer();
+        });
+        
+        // Mode selection
+        const modeOptions = document.querySelectorAll('.mode-option');
+        modeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                modeOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                // Update timer based on selection
+                const durationText = option.querySelector('small').textContent;
+                const duration = parseInt(durationText.match(/\d+/)[0]);
+                timeLeft = duration * 60;
+                updateTimer();
+            });
+        });
+        
+        // Add task functionality
+        const taskInput = document.querySelector('.task-input input');
+        const addTaskBtn = document.querySelector('.task-section .btn');
+        const taskList = document.querySelector('.task-list');
+        
+        addTaskBtn.addEventListener('click', () => {
+            const taskText = taskInput.value.trim();
+            if (taskText) {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; margin: 4px 0;">
+                        <span>${taskText}</span>
+                        <button class="delete-task-btn" style="background: #ff4488; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">删除</button>
+                    </div>
+                `;
+                taskList.appendChild(taskItem);
+                taskInput.value = '';
+                
+                // Add event listener to delete button
+                const deleteBtn = taskItem.querySelector('.delete-task-btn');
+                deleteBtn.addEventListener('click', () => {
+                    taskItem.remove();
+                });
+            }
+        });
+        
+        // Press Enter to add task
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTaskBtn.click();
+            }
+        });
+        
+        // Chat functionality
+        const chatInput = document.querySelector('.chat-input input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatMessages = document.querySelector('.chat-messages');
+        
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                messageDiv.textContent = `我: ${message}`;
+                chatMessages.appendChild(messageDiv);
+                chatInput.value = '';
+                
+                // Auto-scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Simulate response after a delay
+                setTimeout(() => {
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = 'message';
+                    responseDiv.textContent = `晨猫: 收到，专注加油！`;
+                    chatMessages.appendChild(responseDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+        
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Initialize timer display
+        updateTimer();
+    </script>
+</body>
+</html>
